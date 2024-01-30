@@ -9,3 +9,4 @@ class ToggleMute(BaseModel):
     user_id: str
     link: str
     muted: bool
+    user_to_mute: str
