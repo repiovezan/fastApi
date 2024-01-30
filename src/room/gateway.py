@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi_socketio import SocketManager
 
 
-from src.room.schema import UpdatePosition, ToggleMute
+from src.room.schema import UpdatePosition, CreateUserPosition, ToggleMute
 from .service import RoomServices
 from src.core.database import SessionLocal
 from src.core.logger import ApiLogger
@@ -63,11 +63,11 @@ class WebSocketServer:
 
       self.active_sockets.append(WebSocketObject(sid, link, user_id))
 
-      dto = UpdatePosition(x=2, y=2, orientation='front')
+      dto = CreateUserPosition(x=2, y=2, orientation='front')
 
       with SessionLocal() as db_connection:
         service = RoomServices(db_connection)
-        service.update_user_position(user_id=user_id, 
+        service.create_user_position(user_id=user_id, 
                                       link=link, 
                                       client_id=sid, 
                                       dto=dto)
@@ -85,11 +85,9 @@ class WebSocketServer:
 
     link = data['link']
     user_id = data['userId']
-    x = data['x']
-    y = data['y']
-    orientation = data['orientation']
+    direction = data['direction']
 
-    dto = UpdatePosition(x=x, y=y, orientation=orientation)
+    dto = UpdatePosition(direction=direction)
     with SessionLocal() as db_connection:
         service = RoomServices(db_connection)
         service.update_user_position(user_id=user_id, 
