@@ -63,14 +63,13 @@ class RoomService:
 
     def update_user_mute(self, dto: ToggleMute):
         meet = self._get_meet(dto.link)
+        owner = user = self.db.query(User).filter(User.username == meet.owner).first()
         user = self.db.query(User).filter(User.id == dto.user_id).first()
-        self.db.query(Position)\
-            .filter(Position.meet_id == meet.id)\
-            .filter(Position.user_id == user.id)\
-            .update({
-                'muted': dto.muted
-            })
-        self.db.commit()
+        user_to_mute = self.db.query(User).filter(User.id == dto.user_to_mute).first()
+        if (user.id == user_to_mute.id) or (user.id == owner.id):
+            self.db.query(Position).filter(Position.meet_id == meet.id).filter(Position.user_id == user_to_mute.id).update({"muted" : dto.muted})
+            self.db.commit()
+   
 
     def _get_meet(self, link):
         return self.db.query(Meet).filter(Meet.link == link).one()
